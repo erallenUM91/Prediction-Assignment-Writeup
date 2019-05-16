@@ -3,6 +3,8 @@ title: "Prediction Assignment Writeup"
 output: github_document
 ---
 
+`Author: Joao Felizardo`
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -13,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 This project tries to predict the manner (`classe`) in which 6 individuals exercised, using data from accelerometers on the belt, forearm, arm, and dumbell. Based on the other available variables on the training data set, I'll use my prediction model to predict 20 different test cases on the testing data set.
 
 ### Setting up environment
-```{r echo = FALSE, warning=F, message=F, cache=TRUE, cachedChunk}
+```{r echo = TRUE, warning=F, message=F}
 library(caret)
 library(rpart)
 library(randomForest)
@@ -21,7 +23,7 @@ set.seed(2019)
 ```
 
 ### Loading and exploring data
-```{r echo=FALSE}
+```{r echo=TRUE}
 # Loading data
 trainingUrl <- 'https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv'
 testingUrl <- 'https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv'
@@ -67,7 +69,7 @@ I'll build models with the following algorithms:
 4. Boosting (GBM)
 
 By passing the variable `metric` setted as `Accuracy` we estipulate what summary metric will be used to select the optimal model, in this case accuracy. 
-```{r echo=F, warning=F, message=F, cache=TRUE, cachedChunk}
+```{r echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE, cachedChunk}
 # Doing cross-validation 10-fold one time
 control <- trainControl(method="cv", number=10, repeats=1)
 
@@ -75,28 +77,27 @@ control <- trainControl(method="cv", number=10, repeats=1)
 ldaFit <- train(classe ~ ., data = training, method = "lda", trControl=control, metric = "Accuracy")
 knnFit <- train(classe ~ ., data = training, method = "knn", trControl=control, metric = "Accuracy")
 rfFit <- train(classe ~ ., data = training, method = "rf", trControl=control, metric = "Accuracy")
-gbmFit <- train(classe ~ ., data = training, method = "gbm", trControl=control, metric = "Accuracy")
 ```
 
 Let's compare which model has higher accuracy:
 ```{r}
-accuracyMeans = c("ldaFit" = mean(ldaFit$results$Accuracy), "knnFit" = mean(knnFit$results$Accuracy),
-                  "rfFit" = mean(rfFit$results$Accuracy), "gbmFit" = mean(gbmFit$results$Accuracy))
+accuracyMeans <- c("ldaFit" = mean(ldaFit$results$Accuracy), "knnFit" = mean(knnFit$results$Accuracy),
+                  "rfFit" = mean(rfFit$results$Accuracy))
 barplot(accuracyMeans)
+rfMeanAccuracy <- mean(rfFit$results$Accuracy) 
 ```
 
-As we can see the model built with Random Forest algorithm, in this case, is the model whith higher accuracy with a accuracy mean of `r mean(rfFit$results$Accuracy`.
+As we can see the model built with Random Forest algorithm, in this case, is the model whith higher accuracy with a accuracy mean of `r rfMeanAccuracy`.
 
 I'm going to predict the testing data and check with the `confusionMatrix` the viability of this models.
 ```{r echo=T, warning=F, message=F}
 ldaPrediction <- predict(ldaFit, testing)
 knnPrediction <- predict(knnFit, testing)
 rfPrediction <- predict(rfFit, testing)
-gbmPrediction <- predict(gbmFit, testing)
+#gbmPrediction <- predict(gbmFit, testing)
 paste("Linear Discriminant Analysis prediction accuracy: ", confusionMatrix(ldaPrediction, testing$classe)$overall[1])
 paste("k-Nearest Neighbors prediction accuracy: ", confusionMatrix(knnPrediction, testing$classe)$overall[1])
 paste("Random Forest prediction accuracy: ", confusionMatrix(rfPrediction, testing$classe)$overall[1])
-paste("Booting prediction accuracy: ", confusionMatrix(gbmPrediction, testing$classe)$overall[1])
 ```
 
 As we can see, the model built with Random Forest predicted correctly about 99% of the `classe`. I'm going to choose this model to predict the classes on `pmlTrain` data set.
@@ -105,3 +106,4 @@ As we can see, the model built with Random Forest predicted correctly about 99% 
 ```{r}
 predict(rfFit, pmlTest)
 ```
+The most accurate tested algorithm for this case is the Random Forest. 
