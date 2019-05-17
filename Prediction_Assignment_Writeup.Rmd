@@ -66,7 +66,6 @@ I'll build models with the following algorithms:
 1. Linear Discriminant Analysis (LDA)
 2. k-Nearest Neighbors (kNN)
 3. Random Forest (RF)
-4. Boosting (GBM)
 
 By passing the variable `metric` setted as `Accuracy` we estipulate what summary metric will be used to select the optimal model, in this case accuracy. 
 ```{r echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE, cachedChunk}
@@ -94,7 +93,7 @@ I'm going to predict the testing data and check with the `confusionMatrix` the v
 ldaPrediction <- predict(ldaFit, testing)
 knnPrediction <- predict(knnFit, testing)
 rfPrediction <- predict(rfFit, testing)
-#gbmPrediction <- predict(gbmFit, testing)
+
 paste("Linear Discriminant Analysis prediction accuracy: ", confusionMatrix(ldaPrediction, testing$classe)$overall[1])
 paste("k-Nearest Neighbors prediction accuracy: ", confusionMatrix(knnPrediction, testing$classe)$overall[1])
 paste("Random Forest prediction accuracy: ", confusionMatrix(rfPrediction, testing$classe)$overall[1])
